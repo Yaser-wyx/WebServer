@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.Socket;
 
 @Slf4j
+//服务器
 public class BioServer extends Server {
     public BioServer(int port) {
         super(port);
@@ -18,11 +19,12 @@ public class BioServer extends Server {
             try {
                 log.info("等待连接中。。。。");
                 Socket client = this.serverSocket.accept();
-                Thread server = new Thread(new BioServerHandler(client), "server");
+                Thread server = new Thread(new BioServerHandler(client, this.servletContext), "server");
                 server.start();
             } catch (IOException e) {
                 e.printStackTrace();
                 System.out.println("与客户端连接失败。。");
+                this.close();
             }
         }
     }

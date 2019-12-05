@@ -7,9 +7,9 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="HttpServer" />
-        <module name="WebServer" />
         <module name="Example" />
+        <module name="WebServer" />
+        <module name="HttpServer" />
       </profile>
     </annotationProcessing>
   </component>
