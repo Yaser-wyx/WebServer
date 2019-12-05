@@ -25,7 +25,6 @@ public abstract class Server {
     public abstract void start();
 
     public void close() {
-        //关闭服务器
         try {
             this.isRunning = false;
             this.serverSocket.close();
