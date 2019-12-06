@@ -30,17 +30,24 @@ public class ServletContainer implements Runnable {
         this.response = response;
         this.request = request;
         this.serverHandler = serverHandler;
-        this.servlet = new DefaultServlet();
+        if (request != null) {
+            this.servlet = servletContext.getServletByUrl(request.getServletPath());
+        }
     }
 
     @Override
     public void run() {
+
         service();
     }
 
     private void service() {
         try {
-            servlet.service(request, response);
+            if (servlet != null) {
+                servlet.service(request, response);
+            } else {
+                response.write();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

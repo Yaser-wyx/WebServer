@@ -29,16 +29,6 @@ public class BioServerHandler extends Handler implements Runnable {
                 log.info("data不为空！");
                 request = new HttpServletRequest(data);
             }
-         /*   BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
-
-            writer.write("HTTP/1.1 200 OK\n" +
-                    "Date: Sat, 31 Dec 2005 23:59:59 GMT\n" +
-                    "Content-Type: text/html;charset=UTF-8\n" +
-                    "Connection: close\n" +
-                    "Content-Length: 5\n" +
-                    "\n" +
-                    "nihao");
-            writer.flush();*/
             HttpServletResponse response = new HttpServletResponse(out);
             pool.execute(new ServletContainer(servletContext, response, request, this));
         } catch (IOException e) {
@@ -47,6 +37,7 @@ public class BioServerHandler extends Handler implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
+
+
 }
