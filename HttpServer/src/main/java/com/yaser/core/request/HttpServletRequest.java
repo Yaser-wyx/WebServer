@@ -17,9 +17,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 @Slf4j
-
-//用于解析请求报文
 public class HttpServletRequest {
+    //todo 加入session和cookie机制
     @Getter
     private RequestMethod method = null;//请求方式
 
@@ -33,6 +32,10 @@ public class HttpServletRequest {
     private String body = "";//body体信息
 
     private HashMap<String, Object> attributes = new HashMap<>();//用户属性
+
+    public HttpServletRequest() {
+        method = RequestMethod.GET;
+    }
 
     public HttpServletRequest(InputStream in) throws RequestInvalidException, RequestParseException {
         this.parseRequest(readRequest(in));
@@ -169,6 +172,10 @@ public class HttpServletRequest {
             paramsMap.put(oneParam[0].trim().toLowerCase(), oneParam[1]);
         }
         return paramsMap;
+    }
+
+    public RequestDispatcher getRequestDispatcher(String url) {
+        return new HttpRequestDispatcher(url);
     }
 
     public String getParameter(String key) {

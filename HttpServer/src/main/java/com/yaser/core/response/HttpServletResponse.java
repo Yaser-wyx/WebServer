@@ -83,7 +83,10 @@ public class HttpServletResponse {
 
     //重定向
     public void sendRedirect(String url) {
-
+        log.info("重定向至：{}", url);
+        this.addHeader(new Header("Location", url));
+        this.setHttpStatus(HttpStatus.MOVED_TEMPORARILY);
+        this.sendToClient();
     }
 
     private void sendToClient() {

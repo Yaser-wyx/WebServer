@@ -6,6 +6,8 @@ import com.yaser.core.request.HttpServletRequest;
 import com.yaser.core.response.HttpServletResponse;
 import com.yaser.core.servlet.Servlet;
 
+import java.io.IOException;
+
 public abstract class HttpServlet implements Servlet {
     @Override
     public void init() {
@@ -18,7 +20,7 @@ public abstract class HttpServlet implements Servlet {
     }
 
     @Override
-    public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+    public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if (request.getMethod() == RequestMethod.GET) {
             doGet(request, response);
         } else if (request.getMethod() == RequestMethod.POST) {
@@ -30,19 +32,19 @@ public abstract class HttpServlet implements Servlet {
         }
     }
 
-    public void doPost(HttpServletRequest request, HttpServletResponse response) {
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
     }
 
-    public void doGet(HttpServletRequest request, HttpServletResponse response) {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
     }
 
-    public void doPut(HttpServletRequest request, HttpServletResponse response) {
+    public void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
     }
 
-    public void doDelete(HttpServletRequest request, HttpServletResponse response) {
+    public void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
     }
 }

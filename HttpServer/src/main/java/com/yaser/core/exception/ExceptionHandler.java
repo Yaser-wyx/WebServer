@@ -1,12 +1,13 @@
 package com.yaser.core.exception;
 
+import com.yaser.core.constant.HTTPConstant;
 import com.yaser.core.exception.exceptions.RequestInvalidException;
+import com.yaser.core.exception.exceptions.ResourceNotFoundException;
 import com.yaser.core.exception.exceptions.ServletException;
 import com.yaser.core.network.handler.Handler;
-import com.yaser.core.response.Header;
+import com.yaser.core.resource.ResourceHandler;
 import com.yaser.core.response.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -16,9 +17,16 @@ public class ExceptionHandler {
         log.error("抛出异常:{}", e.getClass().getName());
         log.error("异常数据:{}", getErrorMessage(e));
         if (!(e instanceof RequestInvalidException)) {
-            response.setHttpStatus(e.getHttpStatus());
-            response.addHeader(new Header("Connection", "close"));
-            response.write();
+            String url = "/errors/" + e.getHttpStatus().getCode() + ".html";
+            ResourceHandler resourceHandler = new ResourceHandler();
+            byte[] resource = new byte[0];
+            try {
+                resource = resourceHandler.getResourceByUrl(url);
+            } catch (ResourceNotFoundException ex) {
+                ex.printStackTrace();
+            }
+            response.setContentType(HTTPConstant.DEFAULT_CONTENT_TYPE);
+            response.write(resource);
         }
         serverHandler.close();
     }
