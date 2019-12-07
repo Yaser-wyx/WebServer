@@ -1,5 +1,7 @@
 package com.yaser.core.context;
 
+import com.yaser.core.constant.HTTPConstant;
+import com.yaser.core.exception.exceptions.ServletNotFoundException;
 import com.yaser.core.servlet.Servlet;
 import com.yaser.core.servlet.ServletHolder;
 import lombok.extern.slf4j.Slf4j;
@@ -7,11 +9,10 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+import org.springframework.util.AntPathMatcher;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -30,6 +31,10 @@ public class ServletContext {
     private HashMap<String, String> servletMapping;
 
     private HashMap<String, ServletHolder> servlets;
+    //路径匹配器
+    private AntPathMatcher matcher;
+
+    private Servlet defaultServlet;
 
     public ServletContext() {
         init();
@@ -39,14 +44,41 @@ public class ServletContext {
         //读取web.xml配置文件，并加载servlet
         this.servletMapping = new HashMap<>();
         this.servlets = new HashMap<>();
+        this.matcher = new AntPathMatcher();
         parseConfig();
+        //加载默认servlet
+        defaultServlet = this.servlets.get(HTTPConstant.DEFAULT_SERVLET).getServlet();
     }
 
-    public Servlet getServletByUrl(String url) {
-        log.info("要匹配的URL:{}",url);
-        //根据url地址来匹配对应的servlet
+    public Servlet getServletByUrl(String url) throws ServletNotFoundException {
+        log.info("要匹配的URL:{}", url);
+        //根据url地址来进行精确匹配对应的servlet
         String servletName = servletMapping.get(url);
+        if (servletName == null) {
+            //根据url地址进行模糊匹配
+            List<String> matchedPath = new ArrayList<>();//所有匹配的路径
+            Set<String> needToMatchSet = servletMapping.keySet();//所有需要进行匹配的路径
+            for (String needToMatchPath : needToMatchSet) {
+                if (matcher.match(needToMatchPath, url)) {
+                    matchedPath.add(needToMatchPath);
+                }
+            }
+            if (!matchedPath.isEmpty()) {
+                //如果非空，也就是说有路径匹配成功
+                //对所有的路径进行排序处理，取出匹配度最高的
+                Comparator<String> pathComparator = matcher.getPatternComparator(url);
+                matchedPath.sort(pathComparator);
+                servletName = servletMapping.get(matchedPath.get(0));//获取匹配度最高的
+            } else {
+                //说明没有一个符合要求的，使用默认的servlet
+                return defaultServlet;
+            }
+        }
         ServletHolder servletHolder = servlets.get(servletName);
+        if (servletHolder == null) {
+            throw new ServletNotFoundException();
+        }
+        //根据匹配的servletName加载servlet
         Servlet servlet = servletHolder.getServlet();
         if (servlet == null) {
             servlet = initServlet(servletHolder.getServletClass());
@@ -108,13 +140,5 @@ public class ServletContext {
                 servletHolder.getServlet().destroy();
             }
         });
-    }
-
-    public static void main(String[] args) {
-        ServletContext servletContext = new ServletContext();
-        log.info("servlets:{}", servletContext.servlets);
-        log.info("servletMapping:{}", servletContext.servletMapping);
-        Servlet servlet = servletContext.getServletByUrl("/login");
-
     }
 }

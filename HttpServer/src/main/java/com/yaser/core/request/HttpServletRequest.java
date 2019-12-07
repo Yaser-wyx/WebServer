@@ -3,10 +3,14 @@ package com.yaser.core.request;
 import com.yaser.core.enumeration.RequestMethod;
 import com.yaser.core.constant.HTTPConstant;
 import com.yaser.core.constant.CharContest;
+import com.yaser.core.exception.exceptions.RequestInvalidException;
+import com.yaser.core.exception.exceptions.RequestParseException;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -30,12 +34,25 @@ public class HttpServletRequest {
 
     private HashMap<String, Object> attributes = new HashMap<>();//用户属性
 
-    public HttpServletRequest(byte[] data) {
+    public HttpServletRequest(InputStream in) throws RequestInvalidException, RequestParseException {
+        this.parseRequest(readRequest(in));
+    }
+
+    //读取全部的输入流数据，并返回
+    public byte[] readRequest(InputStream in) throws RequestInvalidException {
+        BufferedInputStream bin = new BufferedInputStream(in);
+        byte[] buf = null;
         try {
-            this.parseRequest(data);
-        } catch (Exception e) {
+            buf = new byte[bin.available()];
+            //将数据读取到缓冲区中
+            int len = bin.read(buf);
+            if (len <= 0) {
+                throw new RequestInvalidException();
+            }
+        } catch (IOException e) {
             e.printStackTrace();
         }
+        return buf;
     }
 
     public String getHeader(String key) {
@@ -55,26 +72,22 @@ public class HttpServletRequest {
     }
 
     //解析body体数据
-    private void parseBody(String body) {
-
+    private void parseBody(String body) throws RequestParseException {
         //将body数据读取出来
         int len = Math.min(body.length(), Integer.parseInt(this.getHeader("content-length")));
         this.body = body.substring(0, len);
         String contentType = getHeader("content-type");
         if (contentType.equals(HTTPConstant.TYPE_FORM) || contentType.equals(HTTPConstant.TYPE_TEXT)) {
             //表单格式，则直接调用表单解析
-            try {
-                this.params.putAll(this.parseParams(this.body));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            this.params.putAll(this.parseParams(this.body));
+
         }
         log.info("body数据：{}", this.body);
 
     }
 
     //解析头部信息
-    private void parseHeader(String[] lines) throws Exception {
+    private void parseHeader(String[] lines) throws RequestParseException {
         int lineNum = 0;
         //先解析第一行数据
         this.analysis(lines[lineNum++]);
@@ -84,9 +97,10 @@ public class HttpServletRequest {
                 //如果是空行直接退出
                 break;
             }
+            //提取请求报文的每一行属性值
             int colonIndex = lines[lineNum].indexOf(':');
             if (colonIndex == -1) {
-                throw new Exception("非法的请求");
+                throw new RequestParseException();
             }
             String key = lines[lineNum].substring(0, colonIndex).toLowerCase().trim();
             String value = lines[lineNum].substring(colonIndex + 1).trim();
@@ -96,12 +110,12 @@ public class HttpServletRequest {
         //TODO 解析cookie
     }
 
-    private void parseRequest(byte[] data) throws Exception {
+    private void parseRequest(byte[] data) throws RequestInvalidException, RequestParseException {
         String mergedData = new String(data, StandardCharsets.UTF_8);//使用UTF-8进行编码
         //将数据进行解析
         String[] lines = URLDecoder.decode(mergedData, StandardCharsets.UTF_8).split(CharContest.CRLF);
         if (lines.length <= 1) {
-            throw new Exception("请求不合法");
+            throw new RequestInvalidException();
         }
         log.info("Request 数据读取完毕");
         log.info("行数：{}", lines.length);
@@ -112,16 +126,16 @@ public class HttpServletRequest {
         if (len != null && Integer.parseInt(len.trim()) != 0) {
             log.info("要解析body");
             parseBody(lines[lines.length - 1]);
-        }else{
+        } else {
             log.info("不要解析body");
         }
     }
 
 
     //解析提交方式，路径以及协议
-    private void analysis(String line) {
-        String[] firstLine = line.split(" ");
-        //判断请求方式，只处理GET、POST和HEAD，其它都当做POST处理
+    private void analysis(String line) throws RequestParseException {
+        String[] firstLine = line.split(CharContest.BLANK);
+        //判断请求方式
         this.method = RequestMethod.valueOf(firstLine[0].toUpperCase());
         log.info("method:{}", this.method);
         //解析路径
@@ -132,22 +146,16 @@ public class HttpServletRequest {
             this.url = pathAndParams.substring(0, start);
             log.info("path:{}", this.url);
             String params = pathAndParams.substring(start + 1);
-            try {
-                //解析url参数
-                this.params = this.parseParams(params);
-                log.info("params:{}", this.params);
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.out.println("The request param is invalid!");
-            }
+            //解析url参数
+            this.params = this.parseParams(params);
+            log.info("params:{}", this.params);
         } else {
             this.url = pathAndParams;
         }
-
     }
 
     //解析参数信息
-    private HashMap<String, String> parseParams(String params) throws Exception {
+    private HashMap<String, String> parseParams(String params) throws RequestParseException {
         if (params == null) {
             return new HashMap<>();
         }
@@ -156,7 +164,7 @@ public class HttpServletRequest {
         for (String param : paramList) {
             String[] oneParam = param.split("=");
             if (oneParam.length != 2) {
-                throw new Exception("Param parse error!");
+                throw new RequestParseException();
             }
             paramsMap.put(oneParam[0].trim().toLowerCase(), oneParam[1]);
         }

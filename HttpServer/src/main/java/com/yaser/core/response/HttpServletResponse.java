@@ -43,7 +43,6 @@ public class HttpServletResponse {
                 append(httpStatus.getCode()).append(BLANK).append(httpStatus).append(CRLF);
         response.append("Date:").append(BLANK).append(new Date()).append(CRLF);
         response.append("Content-Type:").append(BLANK).append(contentType).append(CRLF);
-        response.append("Connection:").append(BLANK).append("close").append(CRLF);
         if (hasBody) {
             //如果有body的话，添加body体长度信息
             response.append("Content-Length:").append(BLANK).append(body.length).append(CRLF);
@@ -82,8 +81,9 @@ public class HttpServletResponse {
         this.sendToClient();
     }
 
+    //重定向
     public void sendRedirect(String url) {
-        //TODO 重定向
+
     }
 
     private void sendToClient() {

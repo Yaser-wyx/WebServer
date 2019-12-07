@@ -1,10 +1,13 @@
 package com.yaser.core.servlet;
 
 import com.yaser.core.context.ServletContext;
+import com.yaser.core.exception.exceptions.ServletException;
+import com.yaser.core.exception.exceptions.ServletNotFoundException;
 import com.yaser.core.network.handler.Handler;
 import com.yaser.core.request.HttpServletRequest;
 import com.yaser.core.response.HttpServletResponse;
-import com.yaser.core.servlet.impl.DefaultServlet;
+
+import java.io.IOException;
 
 /**
  * 每一次请求传入时，单个请求的Servlet运行时容器
@@ -13,8 +16,7 @@ import com.yaser.core.servlet.impl.DefaultServlet;
  * 2.存放每一次的请求和响应
  */
 public class ServletContainer implements Runnable {
-    //servlet的上下文环境
-    private ServletContext servletContext;
+
     //要调用的servlet
     private Servlet servlet;
     //响应
@@ -25,31 +27,21 @@ public class ServletContainer implements Runnable {
     private Handler serverHandler;
 
     public ServletContainer(ServletContext servletContext, HttpServletResponse response,
-                            HttpServletRequest request, Handler serverHandler) {
-        this.servletContext = servletContext;
+                            HttpServletRequest request, Handler serverHandler) throws ServletNotFoundException {
         this.response = response;
         this.request = request;
         this.serverHandler = serverHandler;
-        if (request != null) {
-            this.servlet = servletContext.getServletByUrl(request.getServletPath());
-        }
+        this.servlet = servletContext.getServletByUrl(request.getServletPath());
     }
 
     @Override
     public void run() {
-
-        service();
-    }
-
-    private void service() {
         try {
-            if (servlet != null) {
-                servlet.service(request, response);
-            } else {
-                response.write();
-            }
-        } catch (Exception e) {
+            servlet.service(request, response);
+        } catch (IOException e) {
             e.printStackTrace();
+        } catch (ServletException e) {
+            this.serverHandler.getExceptionHandler().handle(e,response,serverHandler);
         } finally {
             this.serverHandler.close();
         }

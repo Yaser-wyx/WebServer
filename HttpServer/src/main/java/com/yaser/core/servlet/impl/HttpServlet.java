@@ -1,11 +1,10 @@
 package com.yaser.core.servlet.impl;
 
 import com.yaser.core.enumeration.RequestMethod;
+import com.yaser.core.exception.exceptions.ServletException;
 import com.yaser.core.request.HttpServletRequest;
 import com.yaser.core.response.HttpServletResponse;
 import com.yaser.core.servlet.Servlet;
-
-import java.io.IOException;
 
 public abstract class HttpServlet implements Servlet {
     @Override
@@ -19,7 +18,7 @@ public abstract class HttpServlet implements Servlet {
     }
 
     @Override
-    public void service(HttpServletRequest request, HttpServletResponse response) {
+    public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException {
         if (request.getMethod() == RequestMethod.GET) {
             doGet(request, response);
         } else if (request.getMethod() == RequestMethod.POST) {

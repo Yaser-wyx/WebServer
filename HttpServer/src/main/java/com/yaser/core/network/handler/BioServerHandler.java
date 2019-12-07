@@ -1,6 +1,7 @@
 package com.yaser.core.network.handler;
 
 import com.yaser.core.context.ServletContext;
+import com.yaser.core.exception.exceptions.ServletException;
 import com.yaser.core.request.HttpServletRequest;
 import com.yaser.core.response.HttpServletResponse;
 import com.yaser.core.servlet.ServletContainer;
@@ -18,24 +19,19 @@ public class BioServerHandler extends Handler implements Runnable {
 
     @Override
     public void run() {
+        HttpServletResponse response = null;
         try {
-            //读取输入流，进行解析
-            InputStream in = client.getInputStream();
-            OutputStream out = client.getOutputStream();
-            //读取请求的head部分，并解析
-            byte[] data = this.readRequest(in);
-            HttpServletRequest request = null;
-            if (data != null) {
-                log.info("data不为空！");
-                request = new HttpServletRequest(data);
-            }
-            HttpServletResponse response = new HttpServletResponse(out);
+            //先初始化response再初始化request，因为在解析request的时候可能出现异常，避免出现异常后response却未初始化
+            response = new HttpServletResponse(client.getOutputStream());
+            //读取请求数据流，并解析
+            HttpServletRequest request = new HttpServletRequest(client.getInputStream());
+            //从线程池中分配线程进行执行
             pool.execute(new ServletContainer(servletContext, response, request, this));
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("IO Exception");
-        } catch (Exception e) {
-            e.printStackTrace();
+            log.error("IO Exception");
+        } catch (ServletException e) {
+            this.exceptionHandler.handle(e, response, this);
         }
     }
 
