@@ -7,7 +7,7 @@ import java.io.File;
 
 public class test {
     public static void main(String[] args) {
-        File file = new File("D:\\WebServer\\HttpServer\\src\\test\\qsn.jpg");
+        File file = new File("D:\\WebServer\\HttpServer\\src\\main\\resources\\errors\\400.html");
         try {
             System.out.println(Magic.getMagicMatch(file, false).getMimeType());
         } catch (MagicParseException | MagicMatchNotFoundException | MagicException e) {

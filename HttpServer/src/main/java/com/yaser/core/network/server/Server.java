@@ -1,8 +1,7 @@
 package com.yaser.core.network.server;
 
-import com.yaser.core.context.ServletContext;
-import com.yaser.core.context.WebApplicationContext;
-import com.yaser.core.network.handler.Handler;
+import com.yaser.core.http.context.ServletContext;
+import com.yaser.core.http.context.WebApplicationContext;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -30,6 +29,7 @@ public abstract class Server {
         try {
             this.isRunning = false;
             this.serverSocket.close();
+            this.servletContext.destroyServlet();
         } catch (IOException e) {
             e.printStackTrace();
         }

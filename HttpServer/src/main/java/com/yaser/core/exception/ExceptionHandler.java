@@ -6,7 +6,7 @@ import com.yaser.core.exception.exceptions.ResourceNotFoundException;
 import com.yaser.core.exception.exceptions.ServletException;
 import com.yaser.core.network.handler.Handler;
 import com.yaser.core.resource.ResourceHandler;
-import com.yaser.core.response.HttpServletResponse;
+import com.yaser.core.http.response.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import java.io.PrintWriter;
 import java.io.StringWriter;
