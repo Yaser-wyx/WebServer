@@ -1,11 +1,13 @@
 package com.yaser.core.http.servlet;
 
-import com.yaser.core.http.context.ServletContext;
+import com.yaser.core.exception.exceptions.RequestInvalidException;
+import com.yaser.core.exception.exceptions.RequestParseException;
 import com.yaser.core.exception.exceptions.ServletException;
 import com.yaser.core.exception.exceptions.ServletNotFoundException;
-import com.yaser.core.network.handler.Handler;
+import com.yaser.core.http.context.ServletContext;
 import com.yaser.core.http.request.HttpServletRequest;
 import com.yaser.core.http.response.HttpServletResponse;
+import com.yaser.core.network.handler.Handler;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -16,7 +18,7 @@ import java.io.IOException;
  * 1.根据不同的url请求调用不同的servlet
  * 2.存放每一次的请求和响应
  */
-public class Container implements Runnable {
+public class ServletContainer implements Runnable {
 
     //要调用的servlet
     private Servlet servlet;
@@ -29,8 +31,7 @@ public class Container implements Runnable {
     //服务器处理程序
     private Handler serverHandler;
 
-    public Container(ServletContext servletContext, HttpServletResponse response,
-                     HttpServletRequest request, Handler serverHandler) throws ServletNotFoundException {
+    public ServletContainer(ServletContext servletContext, HttpServletResponse response, HttpServletRequest request, Handler serverHandler) throws ServletNotFoundException, IOException, RequestInvalidException, RequestParseException {
         this.response = response;
         this.request = request;
         this.request.setContainer(this);

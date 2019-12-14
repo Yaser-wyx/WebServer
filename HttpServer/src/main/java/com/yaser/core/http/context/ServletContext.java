@@ -63,7 +63,11 @@ public class ServletContext {
         this.sessionMap = new ConcurrentHashMap<>();
         this.parseConfig();
         //加载默认servlet
-        this.defaultServlet = this.servlets.get(HTTPConstant.DEFAULT_SERVLET).getServlet();
+        try {
+            this.defaultServlet = this.initServlet(this.servlets.get(HTTPConstant.DEFAULT_SERVLET).getServletClass());
+        } catch (ServletNotFoundException e) {
+            e.printStackTrace();
+        }
         this.scheduledService = Executors.newSingleThreadScheduledExecutor();
         this.scheduledService.scheduleAtFixedRate(new HttpSessionCleaner(), 0, 15, TimeUnit.SECONDS);
     }
@@ -103,6 +107,7 @@ public class ServletContext {
         //根据匹配的servletName加载servlet
         Servlet servlet = servletHolder.getServlet();
         if (servlet == null) {
+            //如果servlet没有实例化，则进行加载
             servlet = initServlet(servletHolder.getServletClass());
             servletHolder.setServlet(servlet);
         }
@@ -111,6 +116,7 @@ public class ServletContext {
 
     private Servlet initServlet(String ServletClassName) throws ServletNotFoundException {
         try {
+            //使用反射进行动态加载
             Servlet servlet = (Servlet) Class.forName(ServletClassName).getDeclaredConstructor().newInstance();
             //调用前初始化
             servlet.init();
@@ -131,23 +137,25 @@ public class ServletContext {
     private void parseConfig() {
         SAXReader reader = new SAXReader();
         try {
+            //加载配置文件
             Document document = reader.read(ServletContext.class.getResourceAsStream("/web.xml"));
             Element root = document.getRootElement();
             //保存servlet名字与servlet类名的映射
             Iterator<Element> servletList = root.elementIterator("servlet");
             while (servletList.hasNext()) {
+                //遍历所有的Servlet
                 Element servlet = servletList.next();
                 String key = servlet.elementText("servlet-name");
                 String value = servlet.elementText("servlet-class");
-                servlets.put(key.trim(), new ServletHolder(value));//保存servlet的类名
+                servlets.put(key.trim(), new ServletHolder(value));//将servlet名字与servlet类名保存为键值对
             }
-            //保存servlet名字与url地址的映射
+            //遍历servlet名字与url地址的映射
             Iterator<Element> servletMappingList = root.elementIterator("servlet-mapping");
             while (servletMappingList.hasNext()) {
                 Element servletMap = servletMappingList.next();
                 String key = servletMap.elementText("url-pattern");
                 String value = servletMap.elementText("servlet-name");
-                servletMapping.put(key, value);
+                servletMapping.put(key, value);//将servlet名字与url地址保存为键值对
             }
         } catch (DocumentException e) {
             e.printStackTrace();
@@ -179,6 +187,7 @@ public class ServletContext {
     }
 
     public void detectSessionIsValid() {
+        //检测Session是否过期
         if (!sessionMap.isEmpty()) {
             Set<String> sessionKeySet = sessionMap.keySet();
             for (String key : sessionKeySet) {
@@ -194,5 +203,9 @@ public class ServletContext {
         } else {
             log.info("当前没有session");
         }
+    }
+    public void destroy(){
+        this.destroyServlet();
+        this.scheduledService.shutdownNow();
     }
 }

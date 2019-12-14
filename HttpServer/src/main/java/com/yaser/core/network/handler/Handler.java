@@ -1,15 +1,14 @@
 package com.yaser.core.network.handler;
 
 
-import com.yaser.core.http.context.ServletContext;
 import com.yaser.core.exception.ExceptionHandler;
+import com.yaser.core.http.context.ServletContext;
+import com.yaser.core.network.server.Server;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.Socket;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -17,16 +16,16 @@ import java.util.concurrent.Executors;
 public abstract class Handler {
     protected ExecutorService pool;
     protected Socket client;
+    protected Server server;
     protected ServletContext servletContext;
-    protected Map<String,Socket> socketMap;
+
     @Getter
     protected ExceptionHandler exceptionHandler;
 
-    public Handler(Socket client, ServletContext servletContext) {
-        this.client = client;
-        this.servletContext = servletContext;
+    public Handler(Server server) {
+        this.server = server;
+        this.servletContext = server.getServletContext();
         exceptionHandler = new ExceptionHandler();
-        socketMap = new ConcurrentHashMap<>();
         //创建一个线程池
         pool = Executors.newFixedThreadPool(10);
     }
@@ -34,6 +33,8 @@ public abstract class Handler {
     public Socket getClient() {
         return client;
     }
+
+    public abstract void start();
 
     public void close() {
         try {

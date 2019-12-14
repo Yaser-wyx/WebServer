@@ -2,26 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>login</title>
+    <title>login success</title>
 </head>
 <body>
 
 <div class="main">
     <div class="title">计算机网络课程设计<br>HTTP Web服务器</div>
     <div class="login-box">
-        <form action="http://localhost:8080/login" method="post">
-            <div class="login-item">
-                <div class="login-text">用户名:</div>
-                <input class="my-input-text" type="text" name="username">
-            </div>
-            <div class="login-item">
-                <div class="login-text">密码:</div>
-                <input class="my-input-text" type="password" name="password">
-            </div>
-            <div class="btn-wrap">
-                <input class="my-login-btn" type="submit" value="登录">
-            </div>
-        </form>
+        <div class="login-text">登陆成功！</div>
+        <div class="login-text">欢迎：</div>
+        <div class="login-text">登陆时间：</div>
     </div>
 </div>
 <div class="footer">
@@ -66,7 +56,6 @@
         border-radius: 10px;
         margin-top: 150px;
         box-shadow: 0px 6px 6px -3px rgba(0, 0, 0, 0.2), 0px 10px 14px 1px rgba(0, 0, 0, 0.14), 0px 4px 18px 3px rgba(0, 0, 0, 0.12) !important;
-
     }
 
     .login-box {
@@ -76,54 +65,15 @@
         margin-left: auto;
         margin-right: auto;
     }
-
-    .login-item {
+    .login-text {
+        margin-top: 5px;
+        font-size: 18px;
+        font-family: "黑体", serif;
+        text-align: center;
+        color: #34495E;
         width: 300px;
         margin-left: auto;
         margin-right: auto;
-        padding: 5px;
-    }
-
-    .login-text {
-        font-size: 18px;
-        font-family: "黑体", serif;
-        color: #34495E;
-        width: 100px;
-        display: inline-block;
-    }
-
-    .my-input-text {
-        margin-top: 5px;
-        margin-bottom: 5px;
-        width: 100%;
-        border-radius: 5px;
-        height: 28px;
-        background-color: #F8F9F9;
-        border: 1px solid #ABB2B9;
-        padding: 3px;
-    }
-
-    .my-input-text:focus {
-        outline: unset !important;
-    }
-
-    .btn-wrap {
-        width: 100%;
-        text-align: center;
-        height: 50px;
-        padding-top: 5px;
-    }
-
-    .my-login-btn {
-        font-family: "Microsoft YaHei", serif;
-        width: 300px;
-        height: 35px;
-        line-height: 35px;
-        border: 0;
-        color: white;
-        background-color: #85C1E9;
-        border-radius: 8px;
-        font-size: 18px;
     }
 </style>
 </html>

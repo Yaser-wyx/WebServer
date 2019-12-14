@@ -8,7 +8,7 @@ import com.yaser.core.exception.exceptions.RequestParseException;
 import com.yaser.core.http.context.WebApplicationContext;
 import com.yaser.core.http.conversation.Cookie;
 import com.yaser.core.http.conversation.HttpSession;
-import com.yaser.core.http.servlet.Container;
+import com.yaser.core.http.servlet.ServletContainer;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,7 @@ import static com.yaser.core.constant.CharContest.*;
 @Slf4j
 public class HttpServletRequest {
     @Setter
-    private Container container;
+    private ServletContainer container;
     @Getter
     private RequestMethod method = null;//请求方式
 
@@ -53,12 +53,15 @@ public class HttpServletRequest {
 
     public HttpSession getSession(boolean createIfNone) {
         if (this.session != null) {
+            //如果Session已经有了，则直接返回
             return this.session;
         }
         if (cookieMap.containsKey(SESSION)) {
+            //判断Cookie中是否存在Session ID
             Cookie cookie = cookieMap.get(SESSION);
             String sessionId = cookie.getValue();//获取sessionId
-            HttpSession currentSession = WebApplicationContext.getServletContext().getSession(sessionId);
+            HttpSession currentSession = WebApplicationContext.getServletContext().
+                    getSession(sessionId);//使用ID获取Session实例
             if (currentSession != null) {
                 this.session = currentSession;
                 return this.session;
@@ -127,7 +130,6 @@ public class HttpServletRequest {
             this.params.putAll(this.parseParams(this.body));
         }
         log.info("body数据：{}", this.body);
-
     }
 
     //解析头部信息
@@ -154,13 +156,17 @@ public class HttpServletRequest {
         if (this.headers.containsKey("cookie")) {
             //如果存在cookie，则对cookie进行解析操作
             String cookies = this.headers.get("cookie");
+            //使用分号进行分割
             String[] cookieList = cookies.split(SEMICOLON);
             for (String rawCookie : cookieList) {
+                //遍历键值对
                 String[] cookieNameVal = rawCookie.trim().split(EQUATION);
+                //按照等号分割
                 if (cookieNameVal.length < 2) {
-                    //抛弃该cookie
+                    //不合法，则抛弃该cookie
                     continue;
                 }
+                //将cookie进行实例化
                 Cookie cookie = new Cookie(cookieNameVal[0], cookieNameVal[1]);
                 cookieMap.put(cookieNameVal[0], cookie);
             }
@@ -191,6 +197,7 @@ public class HttpServletRequest {
 
     //解析提交方式，路径以及协议
     private void analysis(String line) throws RequestParseException {
+        //将首行按照空格进行分割
         String[] firstLine = line.split(CharContest.BLANK);
         //判断请求方式
         this.method = RequestMethod.valueOf(firstLine[0].toUpperCase());

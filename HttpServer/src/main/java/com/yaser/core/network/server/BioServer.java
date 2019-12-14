@@ -1,10 +1,10 @@
 package com.yaser.core.network.server;
 
 import com.yaser.core.network.handler.BioServerHandler;
+import com.yaser.core.network.handler.Handler;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
-import java.net.Socket;
+import java.util.Scanner;
 
 @Slf4j
 //服务器
@@ -15,16 +15,17 @@ public class BioServer extends Server {
 
     @Override
     public void start() {
-        while (isRunning) {
-            try {
-                log.info("等待连接中。。。。");
-                Socket client = this.serverSocket.accept();
-                Thread server = new Thread(new BioServerHandler(client, this.servletContext), "server");
-                server.start();
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println("与客户端连接失败。。");
+        //创建服务器处理程序对象
+        Handler handler = new BioServerHandler(this);
+        handler.start();
+        Scanner scanner = new Scanner(System.in);
+        String cmd;
+        while (scanner.hasNext()) {
+            cmd = scanner.nextLine();
+            if (cmd.equals("EXIT")) {
+                handler.close();
                 this.close();
+                break;
             }
         }
     }

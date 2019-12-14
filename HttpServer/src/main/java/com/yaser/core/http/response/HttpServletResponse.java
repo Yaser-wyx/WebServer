@@ -3,7 +3,7 @@ package com.yaser.core.http.response;
 import com.yaser.core.constant.HTTPConstant;
 import com.yaser.core.enumeration.HttpStatus;
 import com.yaser.core.http.conversation.Cookie;
-import com.yaser.core.http.servlet.Container;
+import com.yaser.core.http.servlet.ServletContainer;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,7 +19,7 @@ import static com.yaser.core.constant.CharContest.*;
 @Slf4j
 public class HttpServletResponse {
     @Setter
-    private Container container;
+    private ServletContainer container;
     private BufferedOutputStream writer;
     private StringBuilder response;
     private ArrayList<Header> headers;//用户添加的头部信息
