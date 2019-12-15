@@ -11,12 +11,14 @@ import java.io.IOException;
 
 //服务器处理程序
 @Slf4j
-public class BioServerHandler extends Handler {
+public class BioServerHandler extends Handler implements Runnable{
     public BioServerHandler(Server server) {
         super(server);
     }
 
-    public void start() {
+    @Override
+    public void run() {
+        log.info("开始监听。。。");
         while (this.server.isRunning()) {
             HttpServletResponse response = null;
             try {
@@ -34,6 +36,5 @@ public class BioServerHandler extends Handler {
                 this.exceptionHandler.handle(e, response, this);
             }
         }
-
     }
 }

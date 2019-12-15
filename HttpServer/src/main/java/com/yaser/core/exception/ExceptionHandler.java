@@ -4,10 +4,12 @@ import com.yaser.core.constant.HTTPConstant;
 import com.yaser.core.exception.exceptions.RequestInvalidException;
 import com.yaser.core.exception.exceptions.ResourceNotFoundException;
 import com.yaser.core.exception.exceptions.ServletException;
+import com.yaser.core.http.response.Header;
+import com.yaser.core.http.response.HttpServletResponse;
 import com.yaser.core.network.handler.Handler;
 import com.yaser.core.resource.ResourceHandler;
-import com.yaser.core.http.response.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -25,6 +27,7 @@ public class ExceptionHandler {
             } catch (ResourceNotFoundException ex) {
                 ex.printStackTrace();
             }
+            response.addHeader(new Header("Connection", "close"));
             response.setContentType(HTTPConstant.DEFAULT_CONTENT_TYPE);
             response.write(resource);
         }

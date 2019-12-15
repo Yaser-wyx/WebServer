@@ -46,6 +46,7 @@ public class LoginServlet extends HttpServlet {
         stringBuilder.append("<!DOCTYPE html>\n" +
                 "<html lang=\"en\">\n" +
                 "<head>\n" +
+                "<link rel=\"shortcut icon\" href=\"http://www.google.com/favicon.ico\" />\n"+
                 "    <meta charset=\"UTF-8\">\n" +
                 "    <title>login success</title>\n" +
                 "</head>\n" +

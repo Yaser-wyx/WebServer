@@ -65,6 +65,7 @@ public class HttpServletResponse {
             }
         }
         response.append("Content-Type:").append(BLANK).append(contentType).append(CRLF);
+//        response.append("Connect:").append(BLANK).append("close").append(CRLF);
         if (hasBody) {
             //如果有body的话，添加body体长度信息
             response.append("Content-Length:").append(BLANK).append(body.length).append(CRLF);

@@ -34,20 +34,10 @@ public abstract class Handler {
         return client;
     }
 
-    public abstract void start();
-
     public void close() {
         try {
             log.info("close socket");
-            if (!client.isInputShutdown()) {
-                this.client.shutdownInput();
-            }
-            if (!client.isOutputShutdown()) {
-                this.client.shutdownOutput();
-            }
-            if (!client.isClosed()) {
-                this.client.close();
-            }
+            this.client.close();
         } catch (IOException e) {
             e.printStackTrace();
             log.error("关闭socket时出现异常!");
